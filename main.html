@@ -23,14 +23,16 @@
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;height:100%;background:var(--bg);color:var(--text);
     font-family:'JetBrains Mono',monospace;overflow:hidden;user-select:none;}
-  #app{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:14px;gap:10px;}
-  h1{font-family:'Orbitron',sans-serif;font-size:22px;font-weight:900;letter-spacing:6px;margin:0;
-    color:var(--cyan);text-shadow:0 0 18px rgba(79,227,255,0.5);}
-  .subtitle{font-size:11px;color:var(--dim);letter-spacing:3px;margin-top:-4px;}
-  #layout{display:flex;gap:14px;align-items:flex-start;}
-  #stageWrap{position:relative;border:2px solid var(--line);box-shadow:0 0 0 4px var(--bg),0 0 40px rgba(79,227,255,0.08) inset,0 10px 30px rgba(0,0,0,0.6);}
-  canvas{display:block;background:#04070c;}
-  #hud{position:absolute;top:0;left:0;right:0;padding:10px 14px;display:flex;flex-direction:column;gap:4px;pointer-events:none;}
+  #app{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;padding:0;gap:0;}
+  h1{display:none;}
+  .subtitle{display:none;}
+  #layout{display:flex;width:100%;height:100%;align-items:center;justify-content:center;}
+  #stageWrap{position:relative;
+    width:min(100vw, calc(100vh * 760 / 520));
+    height:min(100vh, calc(100vw * 520 / 760));
+    border:2px solid var(--line);box-shadow:0 0 0 4px var(--bg),0 0 40px rgba(79,227,255,0.08) inset,0 10px 30px rgba(0,0,0,0.6);}
+  canvas{display:block;background:#04070c;width:100%;height:100%;}
+  #hud{position:absolute;top:0;left:0;right:0;padding:14px 14px 10px;display:flex;flex-direction:column;gap:4px;pointer-events:none;}
   #bossRow{display:flex;justify-content:space-between;align-items:baseline;font-family:'Orbitron',sans-serif;font-size:12px;letter-spacing:1px;}
   #bossName{color:var(--magenta);}
   #floorLabel{color:var(--dim);}
@@ -45,18 +47,37 @@
   #cooldowns{display:flex;gap:6px;font-size:9.5px;color:var(--dim);flex-wrap:wrap;justify-content:flex-end;max-width:220px;}
   .cdChip{position:relative;overflow:hidden;border:1px solid var(--line);padding:4px 8px;background:rgba(255,255,255,0.02);min-width:58px;text-align:center;}
   .cdChip span{position:relative;z-index:1;}
+  .cdChip .cdLabel{display:block;}
+  .cdChip .cdNum{display:block;font-size:9.5px;margin-top:1px;}
   .cdFill{position:absolute;left:0;top:0;bottom:0;width:0%;background:rgba(79,227,255,0.22);transition:width .1s linear;}
   .cdChip.ready{color:var(--cyan);border-color:var(--cyan);}
   .cdChip.ready .cdFill{background:rgba(79,227,255,0.4);}
-  #sidebar{width:238px;background:var(--panel);border:2px solid var(--line);padding:14px;font-size:11px;display:flex;flex-direction:column;gap:12px;}
   .section-title{font-size:10px;color:var(--amber);letter-spacing:2px;border-bottom:1px solid var(--line);padding-bottom:4px;}
   #controls{color:var(--dim);line-height:1.8;font-size:10.5px;}
   #controls b{color:var(--text);}
   #tierList{display:flex;flex-direction:column;gap:3px;color:var(--dim);font-size:10px;}
   #tierList .cur{color:var(--cyan);}
   #skillSummary{color:var(--dim);font-size:10px;line-height:1.9;}
-  #nextUpgrade{color:var(--dim);font-size:10px;letter-spacing:1px;}
-  #nextUpgrade b{color:var(--green);}
+
+  /* ---- 메뉴 버튼 & 정보 모달 (조작법 / 진행 / 업그레이드) ---- */
+  #menuBtn{position:absolute;top:12px;right:12px;z-index:6;pointer-events:auto;
+    width:30px;height:30px;border-radius:50%;background:rgba(10,16,24,0.7);
+    border:1.5px solid var(--line);color:var(--dim);font-family:'Orbitron',sans-serif;
+    font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;
+    transition:border-color .15s,color .15s;}
+  #menuBtn:hover{border-color:var(--cyan);color:var(--cyan);}
+  #infoModal{position:fixed;inset:0;background:rgba(2,4,8,0.94);display:none;align-items:center;justify-content:center;
+    z-index:25;padding:20px;}
+  #infoModalBox{background:var(--panel);border:2px solid var(--line);padding:20px;width:100%;max-width:420px;
+    max-height:82vh;overflow-y:auto;font-size:11px;display:flex;flex-direction:column;gap:14px;position:relative;}
+  #infoModalTitle{font-family:'Orbitron',sans-serif;font-size:14px;letter-spacing:3px;color:var(--cyan);
+    text-shadow:0 0 12px rgba(79,227,255,0.4);}
+  #infoModalClose{position:absolute;top:14px;right:14px;background:none;border:1.5px solid var(--line);
+    color:var(--dim);width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:13px;line-height:1;
+    display:flex;align-items:center;justify-content:center;}
+  #infoModalClose:hover{border-color:var(--red);color:var(--red);}
+  #skillTimerBar{position:absolute;top:0;left:0;right:0;height:4px;background:rgba(255,255,255,0.06);z-index:3;}
+  #skillTimerFill{height:100%;width:0%;background:linear-gradient(90deg,var(--green),#d4ff9d);box-shadow:0 0 8px rgba(157,255,79,0.7);transition:width .1s linear;}
   #overlay,#skillOverlay{position:fixed;inset:0;background:rgba(2,4,8,0.92);display:none;align-items:center;justify-content:center;
     flex-direction:column;gap:14px;z-index:10;text-align:center;padding:20px;}
   #overlay h2{font-family:'Orbitron',sans-serif;font-size:22px;letter-spacing:3px;}
@@ -86,6 +107,26 @@
     padding:14px 34px;font-size:13px;font-weight:700;letter-spacing:3px;cursor:pointer;}
   #startBtn:hover{background:#8ff2ff;}
   #overBest{color:var(--amber);font-size:11px;letter-spacing:1px;margin-top:-6px;}
+
+  /* ---- 모바일 터치 조작 ---- */
+  #mobileControls{display:none;position:fixed;inset:0;pointer-events:none;z-index:15;}
+  #joystickZone{position:absolute;left:22px;bottom:22px;pointer-events:auto;}
+  #joystickBase{width:112px;height:112px;border-radius:50%;background:rgba(79,227,255,0.07);
+    border:2px solid rgba(79,227,255,0.35);position:relative;touch-action:none;}
+  #joystickKnob{width:48px;height:48px;border-radius:50%;background:rgba(79,227,255,0.55);
+    border:2px solid var(--cyan);position:absolute;left:32px;top:32px;transition:transform .04s linear;}
+  #mobileButtons{position:absolute;right:18px;bottom:22px;pointer-events:auto;
+    display:grid;grid-template-columns:repeat(2,64px);grid-auto-rows:64px;gap:10px;}
+  .mobileBtn{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-family:'Orbitron',sans-serif;font-size:9.5px;letter-spacing:0.5px;background:rgba(10,16,24,0.75);
+    touch-action:none;user-select:none;-webkit-tap-highlight-color:transparent;}
+  .mobileBtn:active{background:rgba(255,255,255,0.15);}
+  #btnDash{border:2px solid var(--cyan);color:var(--cyan);}
+  #btnParry{border:2px solid #ffffff;color:#ffffff;}
+  #btnWarp{border:2px solid var(--purple);color:var(--purple);}
+  #btnShield{border:2px solid var(--green);color:var(--green);}
+  body.mobile #mobileControls{display:block;}
+  body.mobile canvas{touch-action:none;}
 </style>
 </head>
 <body>
@@ -95,6 +136,7 @@
   <div id="layout">
     <div id="stageWrap">
       <canvas id="canvas"></canvas>
+      <div id="skillTimerBar"><div id="skillTimerFill"></div></div>
       <div id="hud">
         <div id="bossRow"><span id="bossName">-</span><span id="floorLabel">FLOOR 1</span></div>
         <div class="barOuter" id="bossBar"><div class="barInner" style="width:100%"></div></div>
@@ -105,52 +147,58 @@
           <div class="barOuter" id="playerBar"><div class="barInner" style="width:100%"></div></div>
         </div>
         <div id="cooldowns">
-          <div class="cdChip ready" id="dashChip"><div class="cdFill" id="dashFill"></div><span>DASH</span></div>
-          <div class="cdChip ready" id="parryChip"><div class="cdFill" id="parryFill"></div><span>PARRY</span></div>
-          <div class="cdChip" id="warpChip" style="display:none;"><div class="cdFill" id="warpFill"></div><span>WARP</span></div>
-          <div class="cdChip" id="shieldChip" style="display:none;"><div class="cdFill" id="shieldFill"></div><span>SHIELD</span></div>
+          <div class="cdChip ready" id="dashChip"><div class="cdFill" id="dashFill"></div><span class="cdLabel">DASH</span><span class="cdNum" id="dashNum">0.0</span></div>
+          <div class="cdChip ready" id="parryChip"><div class="cdFill" id="parryFill"></div><span class="cdLabel">PARRY</span><span class="cdNum" id="parryNum">0.0</span></div>
+          <div class="cdChip ready" id="regenChip"><div class="cdFill" id="regenFill"></div><span class="cdLabel">REGEN</span><span class="cdNum" id="regenNum">0.0</span></div>
+          <div class="cdChip" id="warpChip" style="display:none;"><div class="cdFill" id="warpFill"></div><span class="cdLabel">WARP</span><span class="cdNum" id="warpNum">0.0</span></div>
+          <div class="cdChip" id="shieldChip" style="display:none;"><div class="cdFill" id="shieldFill"></div><span class="cdLabel">SHIELD</span><span class="cdNum" id="shieldNum">0.0</span></div>
         </div>
       </div>
       <div id="floorFlash"><div id="floorFlashText"></div></div>
+      <button id="menuBtn" title="메뉴">?</button>
     </div>
-    <div id="sidebar">
-      <div>
-        <div class="section-title">조작</div>
-        <div id="controls">
-          <b>WASD / 방향키</b> — 이동<br>
-          <b>마우스 우클릭</b> — 대시 (커서 방향으로 돌진, 돌진 중 무적)<br>
-          <b>마우스 좌클릭</b> — 패링 (투사체 반사, <span style="color:var(--amber);">닿기 직전에만</span> 성공)<br>
-          <b>Q</b> — 워핑 (습득 시, 마우스 위치로 순간이동)<br>
-          <b>E</b> — 보호막 (습득 시, 짧은 무적)<br><br>
-          직접 공격 수단은 없다.<br>
-          보스는 계속 당신을 쫓아온다.<br>
-          투사체를 <b>패링으로 반사</b>하거나,<br>
-          벽면 <b>도관 장치</b> 근처로,<br>
-          또는 필드에 주기적으로 나타나는<br>
-          <b>함정</b>으로 보스를 유인해<br>
-          걸리게 하면 피해를 입힐 수 있다.<br><br>
-          <span style="color:var(--red);">붉은 레이저</span>와
-          <span style="color:#b84fff;">보라색 탄막</span>은 패링 불가.<br>
-          오직 <b>대시로만 회피</b> 가능.<br><br>
-          맵 중앙의 <b>기둥</b>은 이동을 막고 투사체도 막아준다 — 엄폐물로 활용 가능(레이저·슬램은 통과).<br>
-          <b>도관 장치</b> 위치는 층마다 달라진다.<br><br>
-          <span style="color:var(--green);">30초마다 시스템 업그레이드</span>를 선택할 수 있다.</div>
+  </div>
+</div>
+
+<div id="infoModal">
+  <div id="infoModalBox">
+    <button id="infoModalClose">✕</button>
+    <div id="infoModalTitle">메뉴</div>
+    <div>
+      <div class="section-title">조작</div>
+      <div id="controls">
+        <b>WASD / 방향키</b> — 이동<br>
+        <b>마우스 우클릭</b> — 대시 (커서 방향으로 돌진, 돌진 중 무적)<br>
+        <b>마우스 좌클릭</b> — 패링 (투사체 반사, <span style="color:var(--amber);">닿기 직전에만</span> 성공)<br>
+        <b>Q</b> — 워핑 (습득 시, 마우스 위치로 순간이동)<br>
+        <b>E</b> — 보호막 (습득 시, 짧은 무적)<br><br>
+        직접 공격 수단은 없다.<br>
+        보스는 계속 당신을 쫓아온다.<br>
+        투사체를 <b>패링으로 반사</b>하거나,<br>
+        벽면 <b>도관 장치</b> 근처로,<br>
+        또는 필드에 주기적으로 나타나는<br>
+        <b>함정</b>으로 보스를 유인해<br>
+        걸리게 하면 피해를 입힐 수 있다.<br><br>
+        <span style="color:var(--red);">붉은 레이저</span>와
+        <span style="color:#b84fff;">보라색 탄막</span>은 패링 불가.<br>
+        오직 <b>대시로만 회피</b> 가능.<br><br>
+        맵 중앙의 <b>기둥</b>은 이동을 막고 투사체도 막아준다 — 엄폐물로 활용 가능(레이저·슬램은 통과).<br>
+        <b>도관 장치</b> 위치는 층마다 달라진다.<br><br>
+        <span style="color:var(--green);">30초마다 시스템 업그레이드</span>를 선택할 수 있다.</div>
+    </div>
+    <div>
+      <div class="section-title">진행</div>
+      <div id="tierList">
+        <div>1-10층 · 기본형</div>
+        <div>11-20층 · MK-II</div>
+        <div>21-30층 · MK-III</div>
+        <div>31-40층 · MK-IV (강화)</div>
+        <div>41-50층 · 오메가 (최강)</div>
       </div>
-      <div>
-        <div class="section-title">진행</div>
-        <div id="tierList">
-          <div>1-10층 · 기본형</div>
-          <div>11-20층 · MK-II</div>
-          <div>21-30층 · MK-III</div>
-          <div>31-40층 · MK-IV (강화)</div>
-          <div>41-50층 · 오메가 (최강)</div>
-        </div>
-      </div>
-      <div>
-        <div class="section-title">업그레이드</div>
-        <div id="skillSummary">없음</div>
-      </div>
-      <div id="nextUpgrade">다음 업그레이드: <b>30</b>초</div>
+    </div>
+    <div>
+      <div class="section-title">업그레이드</div>
+      <div id="skillSummary">없음</div>
     </div>
   </div>
 </div>
@@ -179,12 +227,41 @@
   <div id="skillOptions"></div>
 </div>
 
+<div id="mobileControls">
+  <div id="joystickZone">
+    <div id="joystickBase"><div id="joystickKnob"></div></div>
+  </div>
+  <div id="mobileButtons">
+    <button id="btnDash" class="mobileBtn">DASH</button>
+    <button id="btnParry" class="mobileBtn">PARRY</button>
+    <button id="btnWarp" class="mobileBtn" style="display:none;">WARP</button>
+    <button id="btnShield" class="mobileBtn" style="display:none;">SHIELD</button>
+  </div>
+</div>
+
 <script>
 (function(){
   const W=760,H=520;
   const canvas=document.getElementById('canvas');
-  canvas.width=W;canvas.height=H;
   const ctx2d=canvas.getContext('2d');
+  // 캔버스가 CSS로 확대되어도 흐려지지 않도록, 실제 표시 크기 × devicePixelRatio 만큼
+  // 내부 해상도를 키우고, 기존 코드가 쓰는 760x520 논리 좌표계로 스케일 변환한다.
+  function resizeCanvas(){
+    const rect=canvas.getBoundingClientRect();
+    const dpr=window.devicePixelRatio||1;
+    const pw=Math.max(1,Math.round(rect.width*dpr));
+    const ph=Math.max(1,Math.round(rect.height*dpr));
+    if(canvas.width!==pw) canvas.width=pw;
+    if(canvas.height!==ph) canvas.height=ph;
+    const scale=canvas.width/W;
+    ctx2d.setTransform(scale,0,0,scale,0,0);
+  }
+  resizeCanvas();
+  let resizeRaf=null;
+  window.addEventListener('resize',()=>{
+    if(resizeRaf) cancelAnimationFrame(resizeRaf);
+    resizeRaf=requestAnimationFrame(resizeCanvas);
+  });
 
   const PLAYER_SPEED=235, DASH_SPEED=760, DASH_TIME=140, DASH_CD=950;
   const PARRY_WINDOW=90, PARRY_CD=560, PARRY_RADIUS=24;
@@ -225,12 +302,15 @@
   }
 
   // ---- 업그레이드 시스템 상수 ----
-  const SKILL_INTERVAL=30000;      // 30초마다 업그레이드 선택
-  const WARP_CD_BASE=60000;        // 워핑 기본 쿨타임, 추가 습득마다 절반
-  const SHIELD_DUR_BASE=100;       // 보호막 1단계 무적시간(ms) = 0.1초
-  const SHIELD_CD_FIXED=15000;     // 보호막 자체 쿨타임(고정)
+  const SKILL_INTERVAL=30000; // 30초마다 업그레이드 선택
+  const WARP_CD_BASE=120000; // 워핑 기본 쿨타임 2분, 추가 습득마다 절반
+  const WARP_CD_MIN=10000; // 워핑 쿨타임 최소(하한) 10초
+  const SHIELD_DUR_BASE=500; // 보호막 1단계 무적시간(ms) = 0.5초
+  const REGEN_INTERVAL=20000; // 기본 스킬: 20초마다 자동 회복
+  const REGEN_PCT=0.10; // 회복량 = 최대체력의 10%
+  const SHIELD_CD_FIXED=15000; // 보호막 자체 쿨타임(고정)
   const HP_HALF=Math.round(PLAYER_MAXHP*0.5); // 회복/최대체력 증가량 = 시작 체력의 절반
-  const PARRY_STUN_BASE=15;        // 패링 스턴 대미지 기본값
+  const PARRY_STUN_BASE=15; // 패링 스턴 대미지 기본값
 
   function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
   function dist(a,b){return Math.hypot(a.x-b.x,a.y-b.y);}
@@ -242,6 +322,12 @@
       {type:'aimedBurst',count:3,dmg:10,speed:260,interval:180},
       {type:'wait',ms:500},
       {type:'ring',count:8,dmg:9,speed:200,after:900},
+      {type:'wait',ms:450},
+      {type:'telegraph',ms:450,tag:'warn'},
+      {type:'crossBurst',dmg:9,speed:190,after:350},
+      {type:'wait',ms:400},
+      {type:'telegraph',ms:400,tag:'warn'},
+      {type:'spiral',waves:4,perWave:6,dmg:8,speed:180,rotStep:0.5,interval:220},
     ]},
     {name:'포격 터렛',color:'#ffb84f',hp:190,contactDmg:16,sides:4,steps:[
       {type:'telegraph',ms:600,tag:'warn'},
@@ -249,6 +335,12 @@
       {type:'wait',ms:400},
       {type:'telegraph',ms:550,tag:'slam'},
       {type:'slam',dmg:22},
+      {type:'wait',ms:450},
+      {type:'telegraph',ms:450,tag:'warn'},
+      {type:'crossBurst',dmg:11,speed:200,after:350},
+      {type:'wait',ms:400},
+      {type:'telegraph',ms:500,tag:'slam'},
+      {type:'slam',dmg:18},
     ]},
     {name:'광선 감시자',color:'#ff4fd4',hp:170,contactDmg:14,sides:5,steps:[
       {type:'telegraph',ms:500,tag:'laser'},
@@ -258,30 +350,63 @@
       {type:'wait',ms:400},
       {type:'telegraph',ms:700,tag:'laser'},
       {type:'laser',dur:850,rot:0,dmg:17},
+      {type:'wait',ms:450},
+      {type:'telegraph',ms:600,tag:'laser'},
+      {type:'crossLaser',dur:1600,rot:0.9,dmg:9},
+      {type:'wait',ms:400},
+      {type:'telegraph',ms:400,tag:'warn'},
+      {type:'spiral',waves:3,perWave:7,dmg:8,speed:200,rotStep:0.4,interval:200},
     ]},
     {name:'유도 미사일병',color:'#9dff4f',hp:160,contactDmg:14,sides:6,steps:[
       {type:'telegraph',ms:500,tag:'warn'},
       {type:'homing',count:3,dmg:12,speed:150,interval:280},
       {type:'wait',ms:600},
       {type:'mines',count:3,dmg:10,fuse:1400,after:500},
+      {type:'wait',ms:450},
+      {type:'telegraph',ms:400,tag:'warn'},
+      {type:'crossBurst',dmg:10,speed:200,after:350},
+      {type:'wait',ms:400},
+      {type:'telegraph',ms:400,tag:'warn'},
+      {type:'spiral',waves:3,perWave:6,dmg:8,speed:190,rotStep:0.6,interval:230},
     ]},
     {name:'돌격 기갑',color:'#ff4f4f',hp:220,contactDmg:20,sides:3,steps:[
       {type:'telegraph',ms:450,tag:'charge-telegraph'},
       {type:'charge',dmg:24,speed:520,dur:420},
+      {type:'wait',ms:350},
+      {type:'telegraph',ms:400,tag:'charge-telegraph'},
+      {type:'charge',dmg:22,speed:560,dur:380,angleOffset:0.5},
+      {type:'wait',ms:350},
+      {type:'telegraph',ms:400,tag:'charge-telegraph'},
+      {type:'charge',dmg:22,speed:560,dur:380,angleOffset:-0.5},
       {type:'wait',ms:500},
       {type:'telegraph',ms:500,tag:'slam'},
       {type:'slam',dmg:20},
+      {type:'wait',ms:400},
+      {type:'telegraph',ms:400,tag:'warn'},
+      {type:'crossBurst',dmg:10,speed:210,after:350},
     ]},
     {name:'그림자 잠입자',color:'#b84fff',hp:150,contactDmg:15,sides:4,steps:[
       {type:'teleport'},
       {type:'telegraph',ms:350,tag:'warn'},
       {type:'ring',count:10,dmg:9,speed:220,after:700},
       {type:'aimedBurst',count:2,dmg:12,speed:260,interval:200},
+      {type:'teleport'},
+      {type:'telegraph',ms:350,tag:'warn'},
+      {type:'spiral',waves:4,perWave:6,dmg:9,speed:210,rotStep:0.55,interval:200},
+      {type:'wait',ms:350},
+      {type:'telegraph',ms:350,tag:'warn'},
+      {type:'crossBurst',dmg:10,speed:210,after:300},
     ]},
     {name:'지뢰 부설기',color:'#ffe14f',hp:175,contactDmg:14,sides:5,steps:[
       {type:'mines',count:4,dmg:10,fuse:1500,after:600},
       {type:'telegraph',ms:500,tag:'warn'},
       {type:'spread',arms:3,dmg:12,speed:200,after:500},
+      {type:'wait',ms:400},
+      {type:'telegraph',ms:420,tag:'charge-telegraph'},
+      {type:'charge',dmg:18,speed:460,dur:380},
+      {type:'wait',ms:400},
+      {type:'telegraph',ms:400,tag:'warn'},
+      {type:'crossBurst',dmg:10,speed:200,after:350},
     ]},
     {name:'다중 포탑',color:'#4fffe1',hp:200,contactDmg:16,sides:6,steps:[
       {type:'telegraph',ms:500,tag:'warn'},
@@ -289,6 +414,12 @@
       {type:'spread',arms:3,dmg:12,speed:200,after:400},
       {type:'telegraph',ms:500,tag:'laser'},
       {type:'laser',dur:1800,rot:-1.6,dmg:9},
+      {type:'wait',ms:400},
+      {type:'telegraph',ms:400,tag:'warn'},
+      {type:'spiral',waves:4,perWave:7,dmg:9,speed:200,rotStep:0.45,interval:210},
+      {type:'wait',ms:400},
+      {type:'telegraph',ms:450,tag:'warn'},
+      {type:'crossBurst',dmg:11,speed:210,after:350},
     ]},
     {name:'사이오닉 통제기',color:'#c04fff',hp:185,contactDmg:16,sides:7,steps:[
       {type:'telegraph',ms:450,tag:'warn'},
@@ -296,6 +427,15 @@
       {type:'wait',ms:400},
       {type:'telegraph',ms:400,tag:'charge-telegraph'},
       {type:'charge',dmg:22,speed:480,dur:400},
+      {type:'wait',ms:350},
+      {type:'telegraph',ms:380,tag:'charge-telegraph'},
+      {type:'charge',dmg:20,speed:500,dur:360,angleOffset:0.6},
+      {type:'wait',ms:400},
+      {type:'telegraph',ms:500,tag:'laser'},
+      {type:'crossLaser',dur:1500,rot:1.1,dmg:9},
+      {type:'wait',ms:400},
+      {type:'telegraph',ms:400,tag:'warn'},
+      {type:'spiral',waves:3,perWave:7,dmg:9,speed:210,rotStep:0.5,interval:200},
     ]},
     {name:'코어 수호자',color:'#ffffff',hp:260,contactDmg:18,sides:8,steps:[
       {type:'telegraph',ms:500,tag:'laser'},
@@ -308,6 +448,21 @@
       {type:'wait',ms:400},
       {type:'telegraph',ms:700,tag:'laser'},
       {type:'laser',dur:900,rot:0,dmg:15},
+      {type:'wait',ms:400},
+      {type:'telegraph',ms:450,tag:'charge-telegraph'},
+      {type:'charge',dmg:20,speed:500,dur:400},
+      {type:'wait',ms:350},
+      {type:'telegraph',ms:400,tag:'charge-telegraph'},
+      {type:'charge',dmg:20,speed:520,dur:380,angleOffset:0.55},
+      {type:'wait',ms:400},
+      {type:'telegraph',ms:550,tag:'laser'},
+      {type:'crossLaser',dur:1400,rot:-1.2,dmg:11},
+      {type:'wait',ms:400},
+      {type:'telegraph',ms:400,tag:'warn'},
+      {type:'spiral',waves:5,perWave:8,dmg:9,speed:220,rotStep:0.42,interval:190},
+      {type:'wait',ms:400},
+      {type:'telegraph',ms:400,tag:'warn'},
+      {type:'crossBurst',dmg:12,speed:220,after:350},
     ]},
   ];
   const TIER_SUFFIX=['','MK-II','MK-III','MK-IV','오메가'];
@@ -355,6 +510,7 @@
       skills:{warp:0,shield:0,heal:0,maxhp:0,parry:0},
       warpCd:0, warpCdMax:0,
       shieldCd:0, shieldCdMax:0, shieldDuration:0, shieldIncrement:0, shieldActiveTimer:0,
+      regenCd:REGEN_INTERVAL, regenCdMax:REGEN_INTERVAL,
       parryStunDamage:PARRY_STUN_BASE};
   }
 
@@ -368,7 +524,8 @@
       speed:(1+0.18*tier)*Math.min(1.5,aggro),
       wait:Math.max(0.26,(1-0.13*tier)/aggro)
     };
-    const hpMult=(1+0.42*tier)*(tier>=3?1.14:1);
+    // 초반부(1~10층, tier 0) 체력을 낮춰 진입 장벽을 완화한다
+    const hpMult=(1+0.42*tier)*(tier>=3?1.14:1)*(tier===0?0.7:1);
     const hp=Math.round(def.hp*hpMult);
     const dmgMult=(1+0.2*tier)*(tier>=3?1.16:1);
     // 오메가(4티어)는 사이클마다 추가 패턴이 하나 더 붙는다
@@ -407,8 +564,14 @@
         else if(s.type==='mines'){ boss.tag='attack'; doMines(boss,s.count,s.dmg,s.fuse); yield {wait:(s.after||400)*W_}; }
         else if(s.type==='laser'){ boss.tag='laser-active'; doLaser(boss,s.dur*W_,s.rot,s.dmg); yield {wait:s.dur*W_+250}; }
         else if(s.type==='slam'){ boss.tag='slam-active'; doSlam(boss,s.dmg); yield {wait:900}; }
-        else if(s.type==='charge'){ doCharge(boss,s.dmg,s.speed,s.dur); yield {wait:s.dur*(1/boss.scale.speed)+300}; }
+        else if(s.type==='charge'){ doCharge(boss,s.dmg,s.speed,s.dur,s.angleOffset); yield {wait:s.dur*(1/boss.scale.speed)+300}; }
         else if(s.type==='teleport'){ doTeleport(boss); yield {wait:250}; }
+        else if(s.type==='crossBurst'){ boss.tag='attack'; doCrossBurst(boss,s.dmg,s.speed); yield {wait:(s.after||300)*W_}; }
+        else if(s.type==='spiral'){
+          boss.tag='attack';
+          for(let w=0;w<s.waves;w++){ doSpiralWave(boss,s.perWave,s.dmg,s.speed,w*s.rotStep); yield {wait:s.interval*W_}; }
+        }
+        else if(s.type==='crossLaser'){ boss.tag='laser-active'; doCrossLaser(boss,s.dur*W_,s.rot,s.dmg); yield {wait:s.dur*W_+250}; }
       }
       // 패링 불가, 오직 대시로만 피하는 보라색 탄막 러시 (매 사이클 반복)
       yield* purpleBarrage(boss);
@@ -495,11 +658,34 @@
   function doSlam(boss,dmg){
     state.slams.push({x:boss.x,y:boss.y,r:0,maxR:340,speed:420*boss.scale.speed,dmg:dmg*boss.scale.dmg,hit:false});
   }
-  function doCharge(boss,dmg,speed,dur){
-    const ang=angleTo(boss,state.player), sp=speed*boss.scale.speed;
+  function doCharge(boss,dmg,speed,dur,angleOffset){
+    const ang=angleTo(boss,state.player)+(angleOffset||0), sp=speed*boss.scale.speed;
     boss.vx=Math.cos(ang)*sp; boss.vy=Math.sin(ang)*sp;
     boss.moveTimer=dur/boss.scale.speed; boss.chargeActive=true;
     boss.contactDmgCurrent=dmg*boss.scale.dmg; boss.tag='charging';
+  }
+  function doCrossBurst(boss,dmg,speed){
+    // 상하좌우+대각선 8방향으로 동시에 탄을 뿌리는 비조준 패턴
+    const sp=speed*boss.scale.speed;
+    for(let i=0;i<8;i++){
+      const ang=(Math.PI/4)*i;
+      spawnProjectile(boss.x,boss.y,Math.cos(ang)*sp,Math.sin(ang)*sp,dmg*boss.scale.dmg,true,boss.color);
+    }
+  }
+  function doSpiralWave(boss,count,dmg,speed,rotOffset){
+    const sp=speed*boss.scale.speed;
+    for(let i=0;i<count;i++){
+      const ang=(Math.PI*2/count)*i+rotOffset;
+      spawnProjectile(boss.x,boss.y,Math.cos(ang)*sp,Math.sin(ang)*sp,dmg*boss.scale.dmg,true,boss.color);
+    }
+  }
+  function doCrossLaser(boss,dur,rot,dmg){
+    // 서로 90도 어긋난 두 개의 레이저를 동시에 발사
+    const ang=angleTo(boss,state.player);
+    state.lasers.push({x:boss.x,y:boss.y,angle:ang,rot:rot*boss.scale.speed,
+      life:dur,maxLife:dur,dmg:dmg*boss.scale.dmg,hitCd:0});
+    state.lasers.push({x:boss.x,y:boss.y,angle:ang+Math.PI/2,rot:rot*boss.scale.speed,
+      life:dur,maxLife:dur,dmg:dmg*boss.scale.dmg,hitCd:0});
   }
   function doTeleport(boss){
     const ang=Math.random()*Math.PI*2, d=170;
@@ -553,7 +739,7 @@
   // ---- 업그레이드(스킬) 시스템 ----
   const SKILL_POOL=[
     {id:'warp', name:'워핑 (Q)', getDesc:(p)=>{
-      const n=p.skills.warp+1, nextCd=WARP_CD_BASE/Math.pow(2,n-1);
+      const n=p.skills.warp+1, nextCd=Math.max(WARP_CD_MIN, WARP_CD_BASE/Math.pow(2,n-1));
       return `Q키: 마우스 위치로 순간이동.<br>다음 습득 시 쿨타임 ${(nextCd/1000).toFixed(1)}초`+
         (p.skills.warp>0?`<br><span style="color:var(--dim)">(현재 ${(p.warpCdMax/1000).toFixed(1)}초)</span>`:'<br>(신규 습득)');
     }},
@@ -572,7 +758,7 @@
     const p=state.player;
     if(id==='warp'){
       p.skills.warp++;
-      p.warpCdMax=WARP_CD_BASE/Math.pow(2,p.skills.warp-1);
+      p.warpCdMax=Math.max(WARP_CD_MIN, WARP_CD_BASE/Math.pow(2,p.skills.warp-1));
       p.warpCd=0;
     } else if(id==='shield'){
       const inc = p.skills.shield>0 ? p.shieldIncrement/2 : SHIELD_DUR_BASE;
@@ -628,11 +814,12 @@
     document.getElementById('skillOverlay').style.display='flex';
   }
 
-  function tryWarp(){
+  function tryWarp(targetPoint){
     const p=state.player;
     if(p.skills.warp<=0 || p.warpCd>0) return;
-    p.x=clamp(mousePos.x,PLAYER_R+6,W-PLAYER_R-6);
-    p.y=clamp(mousePos.y,PLAYER_R+6,H-PLAYER_R-6);
+    const tp=targetPoint||mousePos;
+    p.x=clamp(tp.x,PLAYER_R+6,W-PLAYER_R-6);
+    p.y=clamp(tp.y,PLAYER_R+6,H-PLAYER_R-6);
     p.warpCd=p.warpCdMax;
     p.hitInvuln=Math.max(p.hitInvuln,150);
   }
@@ -688,12 +875,85 @@
     }
   });
 
+  // ---- 모바일 터치 조작: 왼손 조이스틱(이동) + 오른손 스킬 버튼 ----
+  const isMobile = (window.matchMedia && window.matchMedia('(pointer: coarse)').matches) ||
+    ('ontouchstart' in window && navigator.maxTouchPoints>0);
+  if(isMobile) document.body.classList.add('mobile');
+
+  let joystickDir={x:0,y:0};
+  let joystickTouchId=null;
+  const joystickBase=document.getElementById('joystickBase');
+  const joystickKnob=document.getElementById('joystickKnob');
+  const JOY_RADIUS=42;
+
+  function setJoystickFromTouch(touch){
+    const rect=joystickBase.getBoundingClientRect();
+    const cx=rect.left+rect.width/2, cy=rect.top+rect.height/2;
+    let dx=touch.clientX-cx, dy=touch.clientY-cy;
+    const d=Math.hypot(dx,dy);
+    if(d>JOY_RADIUS){ dx=dx/d*JOY_RADIUS; dy=dy/d*JOY_RADIUS; }
+    joystickKnob.style.transform=`translate(${dx}px,${dy}px)`;
+    if(Math.hypot(dx,dy)>6){ joystickDir={x:dx/JOY_RADIUS,y:dy/JOY_RADIUS}; }
+    else { joystickDir={x:0,y:0}; }
+  }
+  function resetJoystick(){
+    joystickDir={x:0,y:0};
+    joystickKnob.style.transform='translate(0px,0px)';
+  }
+  joystickBase.addEventListener('touchstart',(e)=>{
+    e.preventDefault();
+    const t=e.changedTouches[0];
+    joystickTouchId=t.identifier;
+    setJoystickFromTouch(t);
+  },{passive:false});
+  window.addEventListener('touchmove',(e)=>{
+    if(joystickTouchId===null) return;
+    for(const t of e.changedTouches){
+      if(t.identifier===joystickTouchId){ setJoystickFromTouch(t); e.preventDefault(); }
+    }
+  },{passive:false});
+  window.addEventListener('touchend',(e)=>{
+    for(const t of e.changedTouches){
+      if(t.identifier===joystickTouchId){ joystickTouchId=null; resetJoystick(); }
+    }
+  });
+  window.addEventListener('touchcancel',(e)=>{
+    for(const t of e.changedTouches){
+      if(t.identifier===joystickTouchId){ joystickTouchId=null; resetJoystick(); }
+    }
+  });
+
+  document.getElementById('btnDash').addEventListener('touchstart',(e)=>{
+    e.preventDefault();
+    if(!state || state.mode!=='playing') return;
+    tryDash(); // 방향 인자 없이 호출하면 이동/시선 방향으로 자동 대시
+  },{passive:false});
+  document.getElementById('btnParry').addEventListener('touchstart',(e)=>{
+    e.preventDefault();
+    if(!state || state.mode!=='playing') return;
+    tryParry();
+  },{passive:false});
+  document.getElementById('btnWarp').addEventListener('touchstart',(e)=>{
+    e.preventDefault();
+    if(!state || state.mode!=='playing') return;
+    const p=state.player;
+    if(p.skills.warp<=0) return;
+    const d=200;
+    tryWarp({x:p.x+p.facing.x*d, y:p.y+p.facing.y*d});
+  },{passive:false});
+  document.getElementById('btnShield').addEventListener('touchstart',(e)=>{
+    e.preventDefault();
+    if(!state || state.mode!=='playing') return;
+    tryShield();
+  },{passive:false});
+
   function moveVector(){
     const k=state.keys; let x=0,y=0;
     if(k['w']||k['arrowup']) y-=1;
     if(k['s']||k['arrowdown']) y+=1;
     if(k['a']||k['arrowleft']) x-=1;
     if(k['d']||k['arrowright']) x+=1;
+    if(joystickDir.x!==0||joystickDir.y!==0){ x+=joystickDir.x; y+=joystickDir.y; }
     const len=Math.hypot(x,y);
     if(len>0){x/=len;y/=len;}
     return {x,y};
@@ -738,6 +998,13 @@
     if(p.warpCd>0) p.warpCd-=dt*1000;
     if(p.shieldCd>0) p.shieldCd-=dt*1000;
     if(p.shieldActiveTimer>0) p.shieldActiveTimer-=dt*1000;
+    p.regenCd-=dt*1000;
+    if(p.regenCd<=0){
+      const healAmt=Math.round(p.maxhp*REGEN_PCT);
+      p.hp=Math.min(p.maxhp,p.hp+healAmt);
+      spawnFloatText(p.x,p.y-24,'+'+healAmt,'#9dff4f');
+      p.regenCd+=p.regenCdMax;
+    }
     const parryActive=p.parryTimer>0;
     const playerInvuln=p.dashTimer>0||p.hitInvuln>0||p.shieldActiveTimer>0;
 
@@ -940,14 +1207,16 @@
     ctx2d.restore();
   }
 
-  function updateCdChip(chipId,fillId,cur,max,visible){
+  function updateCdChip(chipId,fillId,numId,cur,max,visible){
     const chip=document.getElementById(chipId), fill=document.getElementById(fillId);
+    const numEl=numId?document.getElementById(numId):null;
     if(visible===false){ chip.style.display='none'; return; }
     chip.style.display='inline-block';
     const ready=cur<=0;
     chip.classList.toggle('ready',ready);
     const pct = max>0 ? clamp(1-cur/max,0,1)*100 : 100;
     fill.style.width=pct+'%';
+    if(numEl) numEl.textContent = ready ? 'READY' : Math.max(0,cur/1000).toFixed(1)+'s';
   }
 
   function render(){
@@ -1132,13 +1401,18 @@
     document.querySelector('#playerBar .barInner').style.width=Math.max(0,p.hp/p.maxhp*100)+'%';
     document.getElementById('playerHpNum').textContent=Math.max(0,Math.round(p.hp))+' / '+p.maxhp;
 
-    updateCdChip('dashChip','dashFill',p.dashCd,DASH_CD);
-    updateCdChip('parryChip','parryFill',p.parryCd,PARRY_CD);
-    updateCdChip('warpChip','warpFill',p.warpCd,p.warpCdMax,p.skills.warp>0);
-    updateCdChip('shieldChip','shieldFill',p.shieldCd,p.shieldCdMax,p.skills.shield>0);
+    updateCdChip('dashChip','dashFill','dashNum',p.dashCd,DASH_CD);
+    updateCdChip('parryChip','parryFill','parryNum',p.parryCd,PARRY_CD);
+    updateCdChip('regenChip','regenFill','regenNum',p.regenCd,p.regenCdMax);
+    updateCdChip('warpChip','warpFill','warpNum',p.warpCd,p.warpCdMax,p.skills.warp>0);
+    updateCdChip('shieldChip','shieldFill','shieldNum',p.shieldCd,p.shieldCdMax,p.skills.shield>0);
+    if(isMobile){
+      document.getElementById('btnWarp').style.display = p.skills.warp>0 ? 'flex' : 'none';
+      document.getElementById('btnShield').style.display = p.skills.shield>0 ? 'flex' : 'none';
+    }
 
-    const nextSec=Math.max(0,Math.ceil(state.skillTimer/1000));
-    document.getElementById('nextUpgrade').innerHTML=`다음 업그레이드: <b>${nextSec}</b>초`;
+    const skillPct=clamp(1-state.skillTimer/SKILL_INTERVAL,0,1)*100;
+    document.getElementById('skillTimerFill').style.width=skillPct+'%';
   }
 
   function loop(now){
@@ -1153,6 +1427,29 @@
     document.getElementById('lobbyOverlay').style.display='none';
     initGame();
   });
+
+  // ---- 메뉴(조작법/진행/업그레이드) 모달 ----
+  const infoModal=document.getElementById('infoModal');
+  let pausedFromPlaying=false;
+  function openMenu(){
+    if(state && state.mode==='playing'){ pausedFromPlaying=true; state.mode='paused'; }
+    infoModal.style.display='flex';
+  }
+  function closeMenu(){
+    infoModal.style.display='none';
+    if(state && pausedFromPlaying){
+      state.mode='playing';
+      state.lastTime=performance.now();
+    }
+    pausedFromPlaying=false;
+  }
+  document.getElementById('menuBtn').addEventListener('click', openMenu);
+  document.getElementById('infoModalClose').addEventListener('click', closeMenu);
+  infoModal.addEventListener('click',(e)=>{ if(e.target===infoModal) closeMenu(); });
+  window.addEventListener('keydown',(e)=>{
+    if(e.key==='Escape' && infoModal.style.display==='flex') closeMenu();
+  });
+
   loadBest();
 })();
 </script>
