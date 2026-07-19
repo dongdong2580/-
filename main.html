@@ -88,13 +88,14 @@
         <div class="section-title">조작</div>
         <div id="controls">
           <b>WASD / 방향키</b> — 이동<br>
-          <b>Shift</b> — 대시 (무적 프레임)<br>
+          <b>Shift</b> — 대시 (누르는 순간 방향키 방향으로 돌진, 돌진 중 무적)<br>
           <b>J</b> — 패링 (투사체 반사)<br><br>
           직접 공격 수단은 없다.<br>
           보스의 투사체를 <b>패링으로 반사</b>하거나,<br>
           벽면 <b>도관 장치</b> 근처로 보스를 유인해<br>
-          역으로 피해를 입혀라.
-        </div>
+          역으로 피해를 입혀라.<br><br>
+          <span style="color:var(--red);">붉은 레이저는 패링 불가.</span><br>
+          오직 <b>대시로만 회피</b> 가능.</div>
       </div>
       <div>
         <div class="section-title">진행</div>
@@ -148,6 +149,9 @@
       {type:'laser',dur:2200,rot:1.4,dmg:9},
       {type:'wait',ms:500},
       {type:'aimedBurst',count:2,dmg:11,speed:250,interval:220},
+      {type:'wait',ms:400},
+      {type:'telegraph',ms:700,tag:'laser'},
+      {type:'laser',dur:850,rot:0,dmg:17},
     ]},
     {name:'유도 미사일병',color:'#9dff4f',hp:160,contactDmg:14,sides:6,steps:[
       {type:'telegraph',ms:500,tag:'warn'},
@@ -195,6 +199,9 @@
       {type:'slam',dmg:22},
       {type:'wait',ms:400},
       {type:'ring',count:12,dmg:10,speed:230,after:800},
+      {type:'wait',ms:400},
+      {type:'telegraph',ms:700,tag:'laser'},
+      {type:'laser',dur:900,rot:0,dmg:15},
     ]},
   ];
   const TIER_SUFFIX=['','MK-II','MK-III','MK-IV','오메가'];
@@ -611,13 +618,15 @@
 
     // lasers
     for(const L of state.lasers){
+      const locked = L.rot===0;
       ctx2d.save();
       ctx2d.translate(L.x,L.y); ctx2d.rotate(L.angle);
+      const col = locked?'255,79,79':'255,79,212';
       const grad=ctx2d.createLinearGradient(0,0,420,0);
-      grad.addColorStop(0,'rgba(255,79,212,0.9)'); grad.addColorStop(1,'rgba(255,79,212,0)');
+      grad.addColorStop(0,`rgba(${col},0.95)`); grad.addColorStop(1,`rgba(${col},0)`);
       ctx2d.fillStyle=grad;
-      ctx2d.fillRect(0,-13,420,26);
-      ctx2d.fillStyle='rgba(255,255,255,0.85)';
+      ctx2d.fillRect(0,locked?-17:-13,420,locked?34:26);
+      ctx2d.fillStyle='rgba(255,255,255,0.9)';
       ctx2d.fillRect(0,-3,420,6);
       ctx2d.restore();
     }
